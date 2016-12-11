@@ -19,8 +19,9 @@ public class ADX2ColliderPlayStop : MonoBehaviour {
         if(atomSource != null)
         {
             atomSource.Play();    
+            Debug.Log("Play \"" + atomSource.cueName + "\"");
         }
-        Debug.Log(other.gameObject.name);
+
     }
 
     void OnTriggerExit(Collider other) {
@@ -28,7 +29,7 @@ public class ADX2ColliderPlayStop : MonoBehaviour {
         if(atomSource != null)
         {
             atomSource.Stop();    
+            Debug.Log("Stop \"" + atomSource.cueName + "\"");
         }
-        Debug.Log(other.gameObject.name);
     }
 }

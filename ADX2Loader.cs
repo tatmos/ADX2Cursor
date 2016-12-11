@@ -53,6 +53,7 @@ public class ADX2Loader : MonoBehaviour
         cursor.AddComponent<ADX2ColliderPlayStop>();
 
         //  エフェクト系のため
+        Debug.Log("AttachDspBusSetting \"" + "DspBusSetting_0" + "\"");
         CriAtom.AttachDspBusSetting("DspBusSetting_0");
 
         //  キューのオブジェクト作成
