@@ -45,19 +45,32 @@ public class ADX2Loader : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        //  ADX2カーソル作成
-        var cursor = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        cursor.name = "ADX2Cursor";
-        var col = cursor.GetComponent<SphereCollider>();
-        col.isTrigger = true;
-        cursor.AddComponent<ADX2ColliderPlayStop>();
+        SetUp();
+    }
+	
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+
+    void SetUp()
+    {
+        //  CRI Atom作成
+        var criAtom = new GameObject("CRIAtom");
+        criAtom.AddComponent<CriAtom>();
+
+        //  ACFロード
+        searchPath = Application.streamingAssetsPath;
+        string acfPath = GetAcfPath();
+        Debug.Log("Load ACF \"" + acfPath + "\"");
+        CriAtomEx.RegisterAcf(null, acfPath);
 
         //  エフェクト系のため
         Debug.Log("AttachDspBusSetting \"" + "DspBusSetting_0" + "\"");
         CriAtom.AttachDspBusSetting("DspBusSetting_0");
 
         //  キューのオブジェクト作成
-        searchPath = Application.streamingAssetsPath;
         GetAcbInfoList(false, searchPath);
         float x = 0;
         foreach (MyAcbInfo acbInfo in myAcbInfoList)
@@ -96,12 +109,13 @@ public class ADX2Loader : MonoBehaviour
             }
             x += 30.0f;
         }
-    }
-	
-    // Update is called once per frame
-    void Update()
-    {
-		
+
+        //  ADX2カーソル作成
+        var cursor = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        cursor.name = "ADX2Cursor";
+        var col = cursor.GetComponent<SphereCollider>();
+        col.isTrigger = true;
+        cursor.AddComponent<ADX2ColliderPlayStop>();
     }
 
     #region kaiseki
@@ -168,6 +182,19 @@ public class ADX2Loader : MonoBehaviour
         {
             GetAcbInfoListCore(directory, ref acbIndex);
         }
+    }
+
+    string GetAcfPath()
+    {
+        string[] files = System.IO.Directory.GetFiles(searchPath);
+        foreach (string file in files)
+        {
+            if (System.IO.Path.GetExtension(file.Replace("\\", "/")) == ".acf")
+            {
+                return file;
+            }
+        }
+        return "";
     }
     #endregion
 }
