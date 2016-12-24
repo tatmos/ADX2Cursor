@@ -7,6 +7,8 @@ public class ADX2Loader : MonoBehaviour
 
     public string searchPath = "";
 
+    public bool makeObject = true;
+
     #region MyCueInfo
     public class MyCueInfo
     {
@@ -47,11 +49,11 @@ public class ADX2Loader : MonoBehaviour
     {
         SetUp();
     }
-	
+
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     void SetUp()
@@ -70,52 +72,60 @@ public class ADX2Loader : MonoBehaviour
         Debug.Log("AttachDspBusSetting \"" + "DspBusSetting_0" + "\"");
         CriAtom.AttachDspBusSetting("DspBusSetting_0");
 
+
         //  キューのオブジェクト作成
         GetAcbInfoList(false, searchPath);
         float x = 0;
         foreach (MyAcbInfo acbInfo in myAcbInfoList)
         {
             //  再生のためキューシートロード
-            CriAtom.AddCueSheet(acbInfo.name,acbInfo.acbPath,acbInfo.awbPath);
+            CriAtom.AddCueSheet(acbInfo.name, acbInfo.acbPath, acbInfo.awbPath);
 
-            float y = 0;
-            foreach (KeyValuePair<int, MyCueInfo> pair in acbInfo.cueInfoList) {
-                //Debug.Log (acbInfo.name + " " + pair.Key + " : " + pair.Value.name);
+            if (makeObject)
+            {
+                float y = 0;
+                foreach (KeyValuePair<int, MyCueInfo> pair in acbInfo.cueInfoList)
+                {
+                    //Debug.Log (acbInfo.name + " " + pair.Key + " : " + pair.Value.name);
 
-                //  cube
-                var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                Rigidbody rb = cube.AddComponent<Rigidbody>();
-                rb.useGravity = false;
+                    //  cube
+                    var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    Rigidbody rb = cube.AddComponent<Rigidbody>();
+                    rb.useGravity = false;
 
-                //  textMesh
-                GameObject go = new GameObject(pair.Value.name);
-                go.transform.localScale = new Vector3(0.1f,0.1f,0);
-                go.transform.localPosition = new Vector3(0.5f,0.5f,0);
-                TextMesh tm = go.AddComponent<TextMesh>();
-                tm.fontSize = 100;
-                tm.text = acbInfo.name + " " + pair.Key + " : " + pair.Value.name;
-                go.transform.parent = cube.transform;
+                    //  textMesh
+                    GameObject go = new GameObject(pair.Value.name);
+                    go.transform.localScale = new Vector3(0.1f, 0.1f, 0);
+                    go.transform.localPosition = new Vector3(0.5f, 0.5f, 0);
+                    TextMesh tm = go.AddComponent<TextMesh>();
+                    tm.fontSize = 100;
+                    tm.text = acbInfo.name + " " + pair.Key + " : " + pair.Value.name;
+                    go.transform.parent = cube.transform;
 
-                cube.transform.position = new Vector3 (x, y, 0);
-                cube.transform.parent = this.gameObject.transform;
+                    cube.transform.position = new Vector3(x, y, 0);
+                    cube.transform.parent = this.gameObject.transform;
 
-                //  ADX2
-                CriAtomSource atomSource = cube.AddComponent<CriAtomSource>();
-                atomSource.cueSheet = acbInfo.name;
-                atomSource.cueName = pair.Value.name;
+                    //  ADX2
+                    CriAtomSource atomSource = cube.AddComponent<CriAtomSource>();
+                    atomSource.cueSheet = acbInfo.name;
+                    atomSource.cueName = pair.Value.name;
 
 
-                y -= 1.2f;
+                    y -= 1.2f;
+                }
+                x += 30.0f;
             }
-            x += 30.0f;
         }
 
-        //  ADX2カーソル作成
-        var cursor = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        cursor.name = "ADX2Cursor";
-        var col = cursor.GetComponent<SphereCollider>();
-        col.isTrigger = true;
-        cursor.AddComponent<ADX2ColliderPlayStop>();
+        if (makeObject)
+        {
+            //  ADX2カーソル作成
+            var cursor = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            cursor.name = "ADX2Cursor";
+            var col = cursor.GetComponent<SphereCollider>();
+            col.isTrigger = true;
+            cursor.AddComponent<ADX2ColliderPlayStop>();
+        }
     }
 
     #region kaiseki
@@ -146,7 +156,7 @@ public class ADX2Loader : MonoBehaviour
 
                 if (acb != null)
                 {
-                    /* キュー名リストの作成 */ 
+                    /* キュー名リストの作成 */
                     CriAtomEx.CueInfo[] cueInfoList = acb.GetCueInfoList();
                     foreach (CriAtomEx.CueInfo cueInfo in cueInfoList)
                     {
@@ -158,7 +168,8 @@ public class ADX2Loader : MonoBehaviour
                         if (myAcbInfo.cueInfoList.ContainsKey(cueInfo.id) == false)
                         {
                             myAcbInfo.cueInfoList.Add(cueInfo.id, tmpCueInfo);
-                        } else
+                        }
+                        else
                         {
                             //  inGame時のサブシーケンスの場合あり
                             //Debug.Log("already exists in the dictionay id:" + cueInfo.id.ToString() +"name:" + cueInfo.name);
@@ -166,7 +177,8 @@ public class ADX2Loader : MonoBehaviour
                     }
 
                     acb.Dispose();
-                } else
+                }
+                else
                 {
                     Debug.Log("GetAcbInfoList LoadAcbFile. acb is null. " + file);
                 }
