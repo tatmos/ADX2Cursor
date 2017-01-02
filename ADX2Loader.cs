@@ -7,7 +7,8 @@ public class ADX2Loader : MonoBehaviour
 
     public string searchPath = "";
 
-    public bool makeObject = true;
+    public bool makeCueObject = true;
+    public bool makeCursorObject = true;
 
     #region MyCueInfo
     public class MyCueInfo
@@ -81,8 +82,9 @@ public class ADX2Loader : MonoBehaviour
             //  再生のためキューシートロード
             CriAtom.AddCueSheet(acbInfo.name, acbInfo.acbPath, acbInfo.awbPath);
 
-            if (makeObject)
+            if (makeCueObject)
             {
+                int itemCount = 0;
                 float y = 0;
                 foreach (KeyValuePair<int, MyCueInfo> pair in acbInfo.cueInfoList)
                 {
@@ -90,37 +92,46 @@ public class ADX2Loader : MonoBehaviour
 
                     //  cube
                     var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    cube.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+                    cube.transform.position = new Vector3(x, y +this.gameObject.transform.localPosition.y, 0 + this.gameObject.transform.localPosition.z);
                     Rigidbody rb = cube.AddComponent<Rigidbody>();
                     rb.useGravity = false;
+                    cube.transform.parent = this.gameObject.transform;
+                    cube.AddComponent<ADX2PlayColor>();
 
                     //  textMesh
-                    GameObject go = new GameObject(pair.Value.name);
-                    go.transform.localScale = new Vector3(0.1f, 0.1f, 0);
-                    go.transform.localPosition = new Vector3(0.5f, 0.5f, 0);
-                    TextMesh tm = go.AddComponent<TextMesh>();
-                    tm.fontSize = 100;
-                    tm.text = acbInfo.name + " " + pair.Key + " : " + pair.Value.name;
-                    go.transform.parent = cube.transform;
+                    //GameObject go = new GameObject(pair.Value.name);
+                    //go.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+                    //go.transform.localPosition = new Vector3(0.0f, -0.1f, -0.1f);
+                    //TextMesh tm = go.AddComponent<TextMesh>();
+                    //tm.fontSize = 10;
+                    //tm.text = /*acbinfo.name + " " + pair.key + " : " + */ pair.Value.name;
+                    //go.transform.parent = cube.transform;
 
-                    cube.transform.position = new Vector3(x, y, 0);
-                    cube.transform.parent = this.gameObject.transform;
 
                     //  ADX2
                     CriAtomSource atomSource = cube.AddComponent<CriAtomSource>();
                     atomSource.cueSheet = acbInfo.name;
                     atomSource.cueName = pair.Value.name;
 
+                    x -= 0.12f;
 
-                    y -= 1.2f;
+                    itemCount++;
+                    if (itemCount % 6 == 0)
+                    {
+                        x = 0;
+                        y += 0.12f;
+                    }
                 }
-                x += 30.0f;
+                x += 10.0f;
             }
         }
 
-        if (makeObject)
+        if (makeCursorObject)
         {
             //  ADX2カーソル作成
             var cursor = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            cursor.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
             cursor.name = "ADX2Cursor";
             var col = cursor.GetComponent<SphereCollider>();
             col.isTrigger = true;
@@ -133,7 +144,8 @@ public class ADX2Loader : MonoBehaviour
     {
         int acbIndex = 0;
         {
-            if (UnityEditor.EditorApplication.isPlaying)
+
+            //if (UnityEditor.EditorApplication.isPlaying)
             {
                 GetAcbInfoListCore(searchPath, ref acbIndex);
             }
