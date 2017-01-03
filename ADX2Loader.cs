@@ -77,6 +77,7 @@ public class ADX2Loader : MonoBehaviour
         //  キューのオブジェクト作成
         GetAcbInfoList(false, searchPath);
         float x = 0;
+        int acbNo = 0;
         foreach (MyAcbInfo acbInfo in myAcbInfoList)
         {
             //  再生のためキューシートロード
@@ -86,6 +87,7 @@ public class ADX2Loader : MonoBehaviour
             {
                 int itemCount = 0;
                 float y = 0;
+                x = 0;
                 foreach (KeyValuePair<int, MyCueInfo> pair in acbInfo.cueInfoList)
                 {
                     //Debug.Log (acbInfo.name + " " + pair.Key + " : " + pair.Value.name);
@@ -93,11 +95,20 @@ public class ADX2Loader : MonoBehaviour
                     //  cube
                     var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-                    cube.transform.position = new Vector3(x, y +this.gameObject.transform.localPosition.y, 0 + this.gameObject.transform.localPosition.z);
+                    cube.transform.position = new Vector3(x + acbNo * 1.0f + this.gameObject.transform.localPosition.x,
+                        y + this.gameObject.transform.localPosition.y,
+                        0 + this.gameObject.transform.localPosition.z);
+
                     Rigidbody rb = cube.AddComponent<Rigidbody>();
                     rb.useGravity = false;
                     cube.transform.parent = this.gameObject.transform;
-                    cube.AddComponent<ADX2PlayColor>();
+                    ADX2PlayColor adx2PlayColor = cube.AddComponent<ADX2PlayColor>();
+                    adx2PlayColor.SetColors(Color.white, Color.red);
+
+                    if (acbNo % 2 == 1)
+                    { 
+                       adx2PlayColor.SetColors(Color.white, Color.blue);
+                    }
 
                     //  textMesh
                     //GameObject go = new GameObject(pair.Value.name);
@@ -123,7 +134,7 @@ public class ADX2Loader : MonoBehaviour
                         y += 0.12f;
                     }
                 }
-                x += 10.0f;
+                acbNo++;
             }
         }
 

@@ -6,18 +6,20 @@ public class ADX2PlayColor : MonoBehaviour
 {
 
     CriAtomSource atomSource;
-    private Color m_color = Color.black;
+    private Color m_color = Color.white;
+    private Color m_playColor = Color.red;
     private MeshRenderer[] m_meshRenderers = null;
+
+    public void SetColors(Color color, Color color2)
+    {
+        m_color = color;
+        m_playColor = color2;
+    }
 
     void Start()
     {
         atomSource = this.gameObject.GetComponent<CriAtomSource>();
-        m_color = new Color(
-               UnityEngine.Random.Range(0.1f, 0.95f),
-               UnityEngine.Random.Range(0.1f, 0.95f),
-               UnityEngine.Random.Range(0.1f, 0.95f),
-               1.0f
-           );
+        
         m_meshRenderers = this.GetComponentsInChildren<MeshRenderer>();
         SetColor(m_color);
     }
@@ -28,11 +30,11 @@ public class ADX2PlayColor : MonoBehaviour
         {
             if (atomSource.player.GetStatus() == CriAtomExPlayer.Status.Playing)
             {
-                SetColor(Color.red);
+                SetColor(m_playColor);
             }
             else
             {
-                SetColor(Color.white);
+                SetColor(m_color);
             }
         }
     }
