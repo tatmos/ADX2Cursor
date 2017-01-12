@@ -4,42 +4,53 @@ using UnityEngine;
 
 public class ADX2Levelmeter : MonoBehaviour
 {
-    private Color m_color = Color.black;
-    private MeshRenderer[] m_meshRenderers = null;
+    public int maxBusNum = 7;
+    private List<Color> m_color = new List<Color>();
+    private List<MeshRenderer[]> m_meshRenderers = new List<MeshRenderer[]>();
 
-    public Vector3 sunrise = new Vector3(0, 1, 10);
-    public Vector3 sunset = new Vector3(0, 0, 10);
-    public float journeyTime = 1.0F;
-    float lastLevel;
+    List<float> lastLevel = new List<float>();
+
+    List<GameObject> cubes = new List<GameObject>();
 
     void Start()
     {
-        lastLevel = 1.0f;
-        m_color = new Color(
-               UnityEngine.Random.Range(0.1f, 0.95f),
-               UnityEngine.Random.Range(0.1f, 0.95f),
-               UnityEngine.Random.Range(0.1f, 0.95f),
-               1.0f
-           );
-        m_meshRenderers = this.GetComponentsInChildren<MeshRenderer>();
-        SetColor(m_color);
+        for (int busNo = 0; busNo < maxBusNum; busNo++)
+        {
+            //  cube
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.transform.parent = this.gameObject.transform;
+            cube.transform.position = new Vector3(busNo * 0.2f + this.gameObject.transform.localPosition.x,
+                0 + this.gameObject.transform.localPosition.y,
+                0 + this.gameObject.transform.localPosition.z);
+            cube.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            cubes.Add(cube);
+
+            lastLevel.Add(1.0f);
+
+            m_color.Add(Color.HSVToRGB((float)busNo/7f, 0.5f, 0.8f));
+            m_meshRenderers.Add(cube.GetComponentsInChildren<MeshRenderer>());
+            SetColor(busNo,m_color[busNo]);
+        }
     }
 
     void Update()
     {
-        CriAtomExAsr.BusAnalyzerInfo lBusInfo = CriAtom.GetBusAnalyzerInfo(0); 
+        for (int busNo = 0; busNo < maxBusNum; busNo++)
+        {
+            CriAtomExAsr.BusAnalyzerInfo lBusInfo = CriAtom.GetBusAnalyzerInfo(busNo);
 
-        lastLevel = Mathf.Lerp(lastLevel, lBusInfo.rmsLevels[1], 0.27f);
+            lastLevel[busNo] = Mathf.Lerp(lastLevel[busNo], lBusInfo.rmsLevels[0], 0.27f);
 
-        SetColor(new Color(0, lastLevel * 0.5f + 0.5f, 0));
-        this.gameObject.transform.localScale = new Vector3(10, 5f+lastLevel * 10f, 0.1f);
+            SetColor(busNo, Color.Lerp(m_color[busNo], Color.white, lastLevel[busNo]));// Mathf.PingPong(Time.time, lastLevel[busNo])));
+            cubes[busNo].transform.localScale = new Vector3(0.1f, 1f + lastLevel[busNo] * 10f, 1f);
+        }
     }
     
-    private void SetColor(Color color)
+    private void SetColor(int busNo,Color color)
     {
-        for (int i = 0; i < m_meshRenderers.Length; ++i)
+        for (int i = 0; i < m_meshRenderers[busNo].Length; ++i)
         {
-            MeshRenderer meshRenderer = m_meshRenderers[i];
+            MeshRenderer meshRenderer = m_meshRenderers[busNo][i];
             for (int j = 0; j < meshRenderer.materials.Length; ++j)
             {
                 Material meshMaterial = meshRenderer.materials[j];
